@@ -3,6 +3,7 @@ package com.example.cp5307_final.ui.activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cp5307_final.domain.model.Scenario
+import com.example.cp5307_final.domain.model.UserProgress
 import com.example.cp5307_final.domain.repository.ScenarioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,7 +59,20 @@ class ActivityViewModel @Inject constructor(
         val selected = state.selectedAnswerIndex ?: return
 
         val correct = selected == scenario.correctAnswerIndex
-        _uiState.update { 
+
+        viewModelScope.launch {
+            repository.saveProgress(
+                UserProgress(
+                    scenarioId = scenario.id,
+                    completed = true,
+                    selectedAnswerIndex = selected,
+                    isCorrect = correct,
+                    lastAttemptedAt = Date().time
+                )
+            )
+        }
+
+        _uiState.update {
             it.copy(
                 isAnswerSubmitted = true,
                 isCorrect = correct
