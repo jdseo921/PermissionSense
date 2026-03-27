@@ -13,6 +13,7 @@ import com.example.cp5307_final.domain.model.UserProgress
 import com.example.cp5307_final.domain.repository.ScenarioRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,7 +27,13 @@ class ScenarioRepositoryImpl @Inject constructor(
 
     override fun getScenarios(): Flow<List<Scenario>> {
         return scenarioDao.getAllScenarios().map { entities ->
-            entities.map { it.toDomain() }
+            if (entities.isEmpty()) {
+                // If database is empty, seed it with SampleData
+                scenarioDao.insertScenarios(SampleData.scenarios)
+                SampleData.scenarios.map { it.toDomain() }
+            } else {
+                entities.map { it.toDomain() }
+            }
         }
     }
 
@@ -85,9 +92,8 @@ class ScenarioRepositoryImpl @Inject constructor(
                 scenarioDao.insertScenarios(remoteScenarios.map { it.toEntity() })
             }
         } catch (e: Exception) {
-            // Fallback to local sample data if DB is empty and network fails
-            val currentScenarios = scenarioDao.getScenarioById(1) // Check if any exist
-            if (currentScenarios == null) {
+            val currentScenarios = scenarioDao.getAllScenarios().map { it.isNotEmpty() }.firstOrNull()
+            if (currentScenarios != true) {
                 scenarioDao.insertScenarios(SampleData.scenarios)
             }
         }

@@ -6,6 +6,7 @@ import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.cp5307_final.data.worker.SyncWorker
@@ -26,6 +27,10 @@ class PermissionSenseApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // Immediately trigger a sync on first start to populate database
+        WorkManager.getInstance(this).enqueue(
+            OneTimeWorkRequestBuilder<SyncWorker>().build()
+        )
         scheduleSync()
     }
 

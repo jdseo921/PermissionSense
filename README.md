@@ -1,43 +1,60 @@
-# PermissionSense
+# PermissionSense: A Digital Privacy Mastery Platform
 
-PermissionSense is an Android educational application designed to teach senior secondary and first-year university students about app permissions and digital privacy risks.
+**PermissionSense** is an advanced Android educational application meticulously designed for senior secondary and first-year university students. It bridges the gap between technical permission requests and real-world digital privacy, empowering users to make informed, security-conscious decisions in an increasingly connected world.
 
-## 📱 App Concept
-The app presents users with realistic mobile app scenarios, asking them to make informed decisions about permission requests. It focuses on:
-- **Privacy Literacy**: Understanding why apps ask for specific data.
-- **Risk Assessment**: Judging if a request is legitimate or a privacy threat.
-- **Interactive Learning**: Short scenarios with multiple-choice answers and detailed explanations.
+---
 
-## 🛠 Technical Stack
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose with Material 3
-- **Architecture**: MVVM (Model-View-ViewModel) with Clean Architecture principles
-- **Dependency Injection**: Hilt
-- **Local Database**: Room (for scenarios and user progress)
-- **Networking**: Retrofit (for remote scenario syncing)
-- **Background Tasks**: WorkManager (for periodic data synchronization)
-- **Preference Storage**: DataStore (for user settings)
-- **Asynchronous Programming**: Coroutines & Flow
-- **Navigation**: Navigation Compose (Type-safe)
+## 🎯 Educational Objective
+The core mission of PermissionSense is to transform "passive acceptance" into "active evaluation." By simulating realistic mobile application scenarios, the platform cultivates:
+- **Privacy Literacy**: Deep understanding of the intent behind data collection.
+- **Critical Risk Assessment**: Ability to distinguish between legitimate operational needs and invasive tracking.
+- **Behavioral Change**: Encouraging best practices such as principle of least privilege and one-time permission usage.
 
-## 🏗 Project Structure
-- `ui/`: Compose screens, ViewModels, and UI state models.
-- `domain/`: Business logic, domain models, and repository interfaces.
-- `data/`: Data sources (Room, Retrofit, DataStore) and repository implementations.
-- `di/`: Hilt modules for dependency injection.
-- `util/`: Helper classes and extension functions.
+---
+
+## ✨ Core Features
+- **Dynamic Scenario Challenges**: Interactive, multi-choice case studies covering Location, Camera, Microphone, SMS, and Storage permissions.
+- **Instant Pedagogical Feedback**: Every decision is followed by a detailed explanation of the underlying privacy principles and potential risks.
+- **Longitudinal Progress Tracking**: Comprehensive statistics visualizing accuracy, completion rates, and categorical performance.
+- **Daily Engagement Loops**: Scheduled "Privacy Challenges" and streak tracking to reinforce consistent learning habits.
+- **Inclusion & Accessibility**: Full support for High Contrast modes, dynamic text sizing, and seamless Dark Mode integration.
+
+---
+
+## 🛠 Technical Architecture
+PermissionSense is built using a modern, reactive stack following the **MVVM (Model-View-ViewModel)** pattern and **Clean Architecture** principles.
+
+- **UI Framework**: [Jetpack Compose](https://developer.android.com/compose) with Material 3 for a fluid, accessible interface.
+- **Dependency Injection**: [Hilt](https://dagger.dev/hilt/) for robust, modular service management.
+- **Local Persistence**: [Room Database](https://developer.android.com/training/data-storage/room) for offline-first scenario management and progress retention.
+- **Networking**: [Retrofit](https://square.github.io/retrofit/) & [OkHttp](https://square.github.io/okhttp/) for secure, periodic scenario synchronization.
+- **Background Operations**: [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) for reliable data syncing and notification scheduling.
+- **Reactive Streams**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) and [Flow](https://kotlinlang.org/docs/flow.html) for non-blocking UI and data operations.
+- **Preference Management**: [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) for type-safe user settings.
+
+---
 
 ## 🚀 Getting Started
-1. **Clone the repository**.
-2. **Open in Android Studio** (Ladybug or newer recommended).
-3. **Sync Gradle**: Ensure all dependencies are downloaded.
-4. **Build and Run**: The app will automatically seed local scenario data on the first launch if no internet connection is available.
 
-## 🧪 Testing
-The project includes unit tests for:
-- Answer validation logic.
-- Statistics aggregation.
-- Repository sync and fallback strategies.
-- ViewModel state transitions.
+### Prerequisites
+- **Android Studio Ladybug** (or later)
+- **Android SDK 35**
+- **Java 17**
 
-Run tests via: `Right-click on src/test -> Run 'All Tests'`
+### Installation
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-repo/permissionsense.git
+   ```
+2. **Open in Android Studio** and allow the initial Gradle sync to complete.
+3. **Build & Deploy**: The app includes a proactive seeding mechanism that populates the local database with essential scenarios on the first launch, ensuring a seamless "Zero-Configuration" experience.
+
+---
+
+## 🧪 Quality Assurance & Testing
+The project maintains high reliability through a comprehensive test suite:
+- **Unit Testing**: Validation of scoring algorithms, data mappers, and repository fallback strategies.
+- **ViewModel Testing**: Verification of state transitions and UI-driven business logic.
+- **Integration Testing**: Ensuring smooth interactions between Room and Repository layers.
+
+*Run all tests via: `gradlew test`*
