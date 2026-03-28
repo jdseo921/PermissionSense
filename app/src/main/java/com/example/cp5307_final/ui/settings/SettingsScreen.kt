@@ -1,5 +1,10 @@
 package com.example.cp5307_final.ui.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -11,8 +16,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.util.*
 
@@ -24,9 +31,18 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
     var showTimePicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     
     val lang = settings?.language ?: "English"
     val t = { key: String -> LanguageManager.getTranslation(key, lang) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.setDailyReminder(true)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -135,7 +151,17 @@ fun SettingsScreen(
                     title = t("daily_reminders"),
                     description = t("daily_reminders_desc"),
                     checked = userSettings.dailyReminder,
-                    onCheckedChange = { viewModel.setDailyReminder(it) }
+                    onCheckedChange = { checked ->
+                        if (checked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                viewModel.setDailyReminder(true)
+                            }
+                        } else {
+                            viewModel.setDailyReminder(checked)
+                        }
+                    }
                 )
 
                 if (userSettings.dailyReminder) {
