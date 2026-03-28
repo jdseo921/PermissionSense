@@ -20,6 +20,10 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * This class handles all the data work for missions and progress.
+ * It decides whether to get data from the local database or the internet.
+ */
 @Singleton
 class ScenarioRepositoryImpl @Inject constructor(
     private val scenarioDao: ScenarioDao,
@@ -27,10 +31,19 @@ class ScenarioRepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ) : ScenarioRepository {
 
+    /**
+     * Gets all available missions. 
+     * It ensures the database is populated with translation-ready keys.
+     */
     override fun getScenarios(): Flow<List<Scenario>> {
         return scenarioDao.getAllScenarios().map { entities ->
-            if (entities.isEmpty()) {
-                // If database is empty, seed it with SampleData
+            // Auto-migration check: If the database is empty OR contains old hardcoded text
+            // (e.g., if the first title doesn't start with 's'), we re-seed with keys.
+            val needsSeeding = entities.isEmpty() || 
+                               (entities.isNotEmpty() && !entities.first().title.startsWith("s"))
+            
+            if (needsSeeding) {
+                scenarioDao.deleteAllScenarios()
                 scenarioDao.insertScenarios(SampleData.scenarios)
                 SampleData.scenarios.map { it.toDomain() }
             } else {
@@ -43,6 +56,9 @@ class ScenarioRepositoryImpl @Inject constructor(
         return scenarioDao.getScenarioById(id)?.toDomain()
     }
 
+    /**
+     * Saves whether the user got a mission right or wrong.
+     */
     override suspend fun saveProgress(progress: UserProgress) {
         userProgressDao.saveProgress(progress.toEntity())
     }
@@ -51,6 +67,9 @@ class ScenarioRepositoryImpl @Inject constructor(
         return userProgressDao.getCompletedCount()
     }
 
+    /**
+     * Calculates the overall percentage of correct answers.
+     */
     override fun getAccuracy(): Flow<Float> {
         return combine(
             userProgressDao.getCompletedCount(),
@@ -60,6 +79,9 @@ class ScenarioRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Generates all the numbers for the Statistics screen.
+     */
     override fun getStatistics(): Flow<Statistics> {
         return combine(
             scenarioDao.getAllScenarios(),
@@ -69,6 +91,7 @@ class ScenarioRepositoryImpl @Inject constructor(
             val completedCount = progressList.count { it.completed }
             val correctCount = progressList.count { it.isCorrect }
             
+            // Group results by category (Privacy, Security, etc.)
             val categoryStats = scenarios.groupBy { it.category }.mapValues { (category, categoryScenarios) ->
                 val totalInCategory = categoryScenarios.size
                 val completedInCategory = categoryScenarios.count { progressMap[it.id]?.completed == true }
@@ -87,6 +110,9 @@ class ScenarioRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Finds all missions that the user has answered incorrectly.
+     */
     override fun getMissedScenarios(): Flow<List<Scenario>> {
         return combine(
             scenarioDao.getAllScenarios(),
@@ -97,9 +123,13 @@ class ScenarioRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Logic to calculate how many consecutive days the user has played.
+     */
     private fun calculateStreak(timestamps: List<Long>): Int {
         if (timestamps.isEmpty()) return 0
         
+        // Clean up timestamps to just represent the day (ignoring hours/minutes)
         val sortedDates = timestamps.map { 
             val cal = Calendar.getInstance()
             cal.timeInMillis = it
@@ -107,8 +137,7 @@ class ScenarioRepositoryImpl @Inject constructor(
             cal.set(Calendar.MINUTE, 0)
             cal.set(Calendar.SECOND, 0)
             cal.set(Calendar.MILLISECOND, 0)
-            val ms = cal.timeInMillis
-            ms
+            cal.timeInMillis
         }.distinct().sortedDescending()
 
         val today = Calendar.getInstance()
@@ -118,16 +147,13 @@ class ScenarioRepositoryImpl @Inject constructor(
         today.set(Calendar.MILLISECOND, 0)
         val todayMs = today.timeInMillis
 
-        var streak = 0
-        var expectedDate = todayMs
-
-        if (sortedDates.isEmpty()) return 0
-
-        if (sortedDates.first() < todayMs - TimeUnit.DAYS.toMillis(1)) {
+        // If the last activity wasn't today or yesterday, the streak is broken
+        if (sortedDates.isEmpty() || sortedDates.first() < todayMs - TimeUnit.DAYS.toMillis(1)) {
             return 0
         }
 
-        expectedDate = sortedDates.first()
+        var streak = 0
+        var expectedDate = sortedDates.first()
         for (date in sortedDates) {
             if (date == expectedDate) {
                 streak++
@@ -140,6 +166,10 @@ class ScenarioRepositoryImpl @Inject constructor(
         return streak
     }
 
+    /**
+     * Tries to download new missions from the internet. 
+     * If the internet is down, it uses the local sample data instead.
+     */
     override suspend fun refreshScenarios() {
         try {
             val remoteScenarios = apiService.getScenarios()
@@ -148,6 +178,7 @@ class ScenarioRepositoryImpl @Inject constructor(
                 scenarioDao.insertScenarios(remoteScenarios.map { it.toEntity() })
             }
         } catch (e: Exception) {
+            // Fallback to local data if network fails
             val currentScenarios = scenarioDao.getAllScenarios().map { it.isNotEmpty() }.firstOrNull()
             if (currentScenarios != true) {
                 scenarioDao.insertScenarios(SampleData.scenarios)
@@ -155,7 +186,11 @@ class ScenarioRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Clears all user progress and reloads scenarios from SampleData.
+     */
     override suspend fun resetUserProgress() {
         userProgressDao.deleteAllProgress()
+        scenarioDao.deleteAllScenarios()
     }
 }

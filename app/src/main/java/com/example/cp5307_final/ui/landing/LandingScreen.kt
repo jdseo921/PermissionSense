@@ -176,7 +176,7 @@ fun LandingScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 22.sp
                             )
-                        } ?: Text("Your next mission is being prepared...")
+                        } ?: Text(t("mission_loading"))
 
                         Spacer(Modifier.height(24.dp))
                         
