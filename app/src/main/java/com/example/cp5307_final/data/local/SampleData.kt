@@ -2,111 +2,116 @@ package com.example.cp5307_final.data.local
 
 import com.example.cp5307_final.data.local.entity.ScenarioEntity
 
+/**
+ * Initial data used to populate the database on the first run.
+ * We use translation keys (like 's1_title') instead of hardcoded text
+ * so that the app can support multiple languages.
+ */
 object SampleData {
     val scenarios = listOf(
         ScenarioEntity(
             id = 1,
-            title = "Location Request",
-            scenarioText = "A weather app asks for 'Always Allow' location permission. Is this necessary?",
-            category = "Privacy",
+            title = "s1_title",
+            scenarioText = "s1_text",
+            category = "cat_privacy",
             difficulty = "Beginner",
-            choice1 = "Yes, always",
-            choice2 = "No, only while using",
-            choice3 = "Never",
-            choice4 = "Only for GPS",
+            choice1 = "s1_c1",
+            choice2 = "s1_c2",
+            choice3 = "s1_c3",
+            choice4 = "s1_c4",
             correctAnswerIndex = 1,
-            explanation = "Weather apps typically only need your location while you are using them to provide local forecasts."
+            explanation = "s1_exp"
         ),
         ScenarioEntity(
             id = 2,
-            title = "Camera Access",
-            scenarioText = "A calculator app requests access to your camera. Should you allow it?",
-            category = "Security",
+            title = "s2_title",
+            scenarioText = "s2_text",
+            category = "cat_security",
             difficulty = "Beginner",
-            choice1 = "Yes",
-            choice2 = "No",
-            choice3 = "Only if it's a 'smart' calculator",
-            choice4 = "Only on weekends",
+            choice1 = "s2_c1",
+            choice2 = "s2_c2",
+            choice3 = "s2_c3",
+            choice4 = "s2_c4",
             correctAnswerIndex = 1,
-            explanation = "A standard calculator app has no legitimate reason to access your camera."
+            explanation = "s2_exp"
         ),
         ScenarioEntity(
             id = 3,
-            title = "Contacts Access",
-            scenarioText = "A social media app wants to access your contacts to find friends. What's the best practice?",
-            category = "Social",
+            title = "s3_title",
+            scenarioText = "s3_text",
+            category = "cat_social",
             difficulty = "Intermediate",
-            choice1 = "Allow always",
-            choice2 = "Deny everything",
-            choice3 = "Only sync once and review",
-            choice4 = "Use a fake contact list",
+            choice1 = "s3_c1",
+            choice2 = "s3_c2",
+            choice3 = "s3_c3",
+            choice4 = "s3_c4",
             correctAnswerIndex = 2,
-            explanation = "It's best to only sync once to see who is on the platform and then revoke access if you don't need ongoing syncing."
+            explanation = "s3_exp"
         ),
         ScenarioEntity(
             id = 4,
-            title = "Microphone Usage",
-            scenarioText = "A voice recorder app needs microphone access. When should it have it?",
-            category = "Privacy",
+            title = "s4_title",
+            scenarioText = "s4_text",
+            category = "cat_privacy",
             difficulty = "Beginner",
-            choice1 = "Always",
-            choice2 = "Only when using the app",
-            choice3 = "Only when my screen is off",
-            choice4 = "Only for phone calls",
+            choice1 = "s4_c1",
+            choice2 = "s4_c2",
+            choice3 = "s4_c3",
+            choice4 = "s4_c4",
             correctAnswerIndex = 1,
-            explanation = "Privacy best practices suggest only giving apps access to sensitive hardware while you are actively using the feature."
+            explanation = "s4_exp"
         ),
         ScenarioEntity(
             id = 5,
-            title = "Background Location",
-            scenarioText = "A fitness tracker asks for background location to map your runs. Is this valid?",
-            category = "Privacy",
+            title = "s5_title",
+            scenarioText = "s5_text",
+            category = "cat_privacy",
             difficulty = "Intermediate",
-            choice1 = "Yes, if you want full maps",
-            choice2 = "No, background is never needed",
-            choice3 = "Only if the app is open",
-            choice4 = "Only for battery optimization",
+            choice1 = "s5_c1",
+            choice2 = "s5_c2",
+            choice3 = "s5_c3",
+            choice4 = "s5_c4",
             correctAnswerIndex = 0,
-            explanation = "Fitness trackers often need background location to accurately record your path even when the screen is off or the app is in the background."
+            explanation = "s5_exp"
         ),
         ScenarioEntity(
             id = 6,
-            title = "File Access",
-            scenarioText = "A photo editor asks for permission to 'All Files'. Should you grant it?",
-            category = "Security",
+            title = "s6_title",
+            scenarioText = "s6_text",
+            category = "cat_security",
             difficulty = "Intermediate",
-            choice1 = "Yes, it needs to see all photos",
-            choice2 = "No, use the Photo Picker instead",
-            choice3 = "Only if you have many files",
-            choice4 = "Only for JPEG files",
+            choice1 = "s6_c1",
+            choice2 = "s6_c2",
+            choice3 = "s6_c3",
+            choice4 = "s6_c4",
             correctAnswerIndex = 1,
-            explanation = "Modern Android versions provide a Photo Picker that lets you select specific images without giving the app access to your entire storage."
+            explanation = "s6_exp"
         ),
         ScenarioEntity(
             id = 7,
-            title = "Calendar Access",
-            scenarioText = "A flight booking app wants to add trips to your calendar. Safe?",
-            category = "Convenience",
+            title = "s7_title",
+            scenarioText = "s7_text",
+            category = "cat_convenience",
             difficulty = "Beginner",
-            choice1 = "Yes, very convenient",
-            choice2 = "No, it will steal your schedule",
-            choice3 = "Only if you use Google Calendar",
-            choice4 = "Only if it's an international flight",
+            choice1 = "s7_c1",
+            choice2 = "s7_c2",
+            choice3 = "s7_c3",
+            choice4 = "s7_c4",
             correctAnswerIndex = 0,
-            explanation = "This is a standard convenience feature. However, always be mindful of what other calendar data the app might be able to read."
+            explanation = "s7_exp"
         ),
         ScenarioEntity(
             id = 8,
-            title = "SMS Permissions",
-            scenarioText = "An online store asks for SMS permissions to 'auto-fill OTP codes'. Risk?",
-            category = "Security",
+            title = "s8_title",
+            scenarioText = "s8_text",
+            category = "cat_security",
             difficulty = "Advanced",
-            choice1 = "Low risk, it's just for codes",
-            choice2 = "High risk, it can read all messages",
-            choice3 = "No risk at all",
-            choice4 = "Only risky on old phones",
+            choice1 = "s8_c1",
+            choice2 = "s8_c2",
+            choice3 = "s8_c3",
+            choice4 = "s8_c4",
             correctAnswerIndex = 1,
-            explanation = "Granting SMS permissions often allows the app to read *all* your messages, not just the OTP. Use the SMS Retriever API instead if possible."
+            explanation = "s8_exp"
         )
     )
 }

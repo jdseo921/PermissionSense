@@ -155,7 +155,7 @@ fun LandingScreen(
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
-                                    text = scenario.category.uppercase(),
+                                    text = t(scenario.category).uppercase(),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -165,13 +165,13 @@ fun LandingScreen(
                             Spacer(Modifier.height(16.dp))
                             // The title and text of the mission
                             Text(
-                                text = scenario.title,
+                                text = t(scenario.title),
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                text = scenario.scenarioText,
+                                text = t(scenario.scenarioText),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 22.sp
@@ -226,7 +226,7 @@ fun LandingScreen(
                                     )
                                     Spacer(Modifier.width(12.dp))
                                     Text(
-                                        text = scenario.title,
+                                        text = t(scenario.title),
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.error
                                     )
@@ -241,7 +241,7 @@ fun LandingScreen(
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 Text(
-                                    text = scenario.explanation,
+                                    text = t(scenario.explanation),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

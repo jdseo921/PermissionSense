@@ -146,7 +146,7 @@ fun ActivityScreen(
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
-                                        text = scenario.category.uppercase(),
+                                        text = t(scenario.category).uppercase(),
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                         color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -154,12 +154,12 @@ fun ActivityScreen(
                                 }
                                 Spacer(Modifier.height(16.dp))
                                 Text(
-                                    text = scenario.title,
+                                    text = t(scenario.title),
                                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                                 )
                                 Spacer(Modifier.height(12.dp))
                                 Text(
-                                    text = scenario.scenarioText,
+                                    text = t(scenario.scenarioText),
                                     style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -180,7 +180,7 @@ fun ActivityScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             scenario.choices.forEachIndexed { index, choice ->
                                 AnswerOptionCard(
-                                    text = choice,
+                                    text = t(choice),
                                     isSelected = uiState.selectedAnswerIndex == index,
                                     isCorrect = scenario.correctAnswerIndex == index,
                                     showResult = uiState.isAnswerSubmitted,
@@ -221,7 +221,7 @@ fun ActivityScreen(
                                         Spacer(Modifier.height(16.dp))
                                         // Explains WHY the answer was right or wrong
                                         Text(
-                                            text = scenario.explanation,
+                                            text = t(scenario.explanation),
                                             style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
