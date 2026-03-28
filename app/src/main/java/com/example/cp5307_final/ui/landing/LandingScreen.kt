@@ -1,16 +1,24 @@
 package com.example.cp5307_final.ui.landing
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,142 +36,161 @@ fun LandingScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("PermissionSense", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold) }
+            LargeTopAppBar(
+                title = { 
+                    Column {
+                        Text("PermissionSense", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        Text("Empowering Your Privacy", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    }
+                },
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(24.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Purpose Header
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Master Your Digital Privacy",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Learn to identify and manage app permission risks through real-world scenarios designed for students.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-            }
-
-            // Summary Stats Card
+            // Summary Stats Card - Updated layout for spacing
             Card(
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatItem("Completed", uiState.totalCompleted.toString())
-                    VerticalDivider(modifier = Modifier.height(40.dp), color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
-                    StatItem("Streak", "${uiState.currentStreak} Days")
-                    VerticalDivider(modifier = Modifier.height(40.dp), color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
-                    StatItem("Accuracy", "${uiState.accuracy}%")
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        StatItem("Learnt", uiState.totalCompleted.toString(), Icons.Default.Star)
+                    }
+                    VerticalDivider(modifier = Modifier.height(40.dp), color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        StatItem("Streak", "${uiState.currentStreak}d", Icons.Default.PlayArrow)
+                    }
+                    VerticalDivider(modifier = Modifier.height(40.dp), color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        StatItem("Score", "${uiState.accuracy}%", Icons.Default.Info)
+                    }
                 }
             }
 
-            // Today's Challenge Section
-            Text(
-                text = "Today's Privacy Challenge",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start)
-            )
+            // Today's Challenge Section - Prominent Action
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Today's Mission",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.align(Alignment.Start)
+                )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    uiState.todaysChallenge?.let { scenario ->
-                        Text(
-                            text = scenario.title,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = MaterialTheme.shapes.small
-                        ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        uiState.todaysChallenge?.let { scenario ->
+                            Surface(
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = scenario.category.uppercase(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                            Spacer(Modifier.height(12.dp))
                             Text(
-                                text = scenario.category,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                text = scenario.title,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = scenario.scenarioText,
-                            style = MaterialTheme.typography.bodyLarge,
-                            maxLines = 3,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    } ?: Text("Preparing your next challenge...")
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = scenario.scenarioText,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 3
+                            )
+                        } ?: Text("Your next mission is being prepared...")
 
-                    Spacer(Modifier.height(24.dp))
-                    Button(
-                        onClick = onStartActivity,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(16.dp)
-                    ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Start Privacy Quiz", style = MaterialTheme.typography.labelLarge)
+                        Spacer(Modifier.height(24.dp))
+                        
+                        Button(
+                            onClick = onStartActivity,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            contentPadding = PaddingValues(16.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("ENTER MISSION", style = MaterialTheme.typography.labelLarge)
+                        }
                     }
                 }
             }
 
             Spacer(Modifier.weight(1f))
 
-            // Actions
-            OutlinedButton(
-                onClick = onViewStatistics,
-                modifier = Modifier.fillMaxWidth(),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            // Quick Actions
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Review Detailed Progress")
-            }
+                OutlinedButton(
+                    onClick = onViewStatistics,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+                ) {
+                    Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("PROGRESS")
+                }
 
-            TextButton(
-                onClick = onOpenSettings,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("App Preferences & Accessibility", color = MaterialTheme.colorScheme.secondary)
+                OutlinedButton(
+                    onClick = onOpenSettings,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+                ) {
+                    Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("SETTINGS")
+                }
             }
         }
     }
 }
 
 @Composable
-fun StatItem(label: String, value: String) {
+fun StatItem(label: String, value: String, icon: ImageVector) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.height(4.dp))
         Text(
             text = value,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer
         )

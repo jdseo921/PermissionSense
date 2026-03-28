@@ -38,7 +38,9 @@ class ActivityViewModel @Inject constructor(
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            currentScenario = scenarios[currentIndex]
+                            currentScenario = scenarios[currentIndex],
+                            currentStep = currentIndex + 1,
+                            totalSteps = scenarios.size
                         )
                     }
                 } else {
@@ -88,7 +90,8 @@ class ActivityViewModel @Inject constructor(
                     currentScenario = allScenarios[currentIndex],
                     selectedAnswerIndex = null,
                     isAnswerSubmitted = false,
-                    isCorrect = false
+                    isCorrect = false,
+                    currentStep = currentIndex + 1
                 )
             }
         } else {

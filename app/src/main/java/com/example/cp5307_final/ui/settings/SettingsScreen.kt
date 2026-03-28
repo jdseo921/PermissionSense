@@ -1,12 +1,15 @@
 package com.example.cp5307_final.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.util.*
@@ -55,6 +58,38 @@ fun SettingsScreen(
                     checked = userSettings.highContrast,
                     onCheckedChange = { viewModel.setHighContrast(it) }
                 )
+
+                HorizontalDivider()
+
+                // Font Size Setting
+                Text(text = "Font Size", style = MaterialTheme.typography.titleMedium)
+                val radioOptions = listOf("Small", "Medium", "Large")
+                Column(Modifier.selectableGroup()) {
+                    radioOptions.forEach { text ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .selectable(
+                                    selected = (text == userSettings.textSize),
+                                    onClick = { viewModel.setTextSize(text) },
+                                    role = Role.RadioButton
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (text == userSettings.textSize),
+                                onClick = null // null recommended for accessibility with screen readers
+                            )
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
 
                 HorizontalDivider()
 

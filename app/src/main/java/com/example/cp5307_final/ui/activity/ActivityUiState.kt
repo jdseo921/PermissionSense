@@ -9,5 +9,10 @@ data class ActivityUiState(
     val isAnswerSubmitted: Boolean = false,
     val isCorrect: Boolean = false,
     val errorMessage: String? = null,
-    val isFinished: Boolean = false
-)
+    val isFinished: Boolean = false,
+    val currentStep: Int = 0,
+    val totalSteps: Int = 0
+) {
+    val progress: Float
+        get() = if (totalSteps > 0) (currentStep.toFloat() / totalSteps.toFloat()) else 0f
+}
