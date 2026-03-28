@@ -16,7 +16,8 @@ The core mission of PermissionSense is to transform "passive acceptance" into "a
 - **Dynamic Scenario Challenges**: Interactive, multi-choice case studies covering Location, Camera, Microphone, SMS, and Storage permissions.
 - **Instant Pedagogical Feedback**: Every decision is followed by a detailed explanation of the underlying privacy principles and potential risks.
 - **Longitudinal Progress Tracking**: Comprehensive statistics visualizing accuracy, completion rates, and categorical performance.
-- **Daily Engagement Loops**: Scheduled "Privacy Challenges" and streak tracking to reinforce consistent learning habits.
+- **Daily Engagement Loops**: Scheduled "Privacy Challenges" and **Streak Tracking** (with fire visual effects) to reinforce consistent learning habits.
+- **Multilingual Support**: Support for **English**, **Mandarin Chinese**, and **Korean**, allowing users to learn privacy concepts in their preferred language.
 - **Inclusion & Accessibility**: Full support for High Contrast modes, dynamic text sizing, and seamless Dark Mode integration.
 
 ---
@@ -30,7 +31,8 @@ PermissionSense is built using a modern, reactive stack following the **MVVM (Mo
 - **Networking**: [Retrofit](https://square.github.io/retrofit/) & [OkHttp](https://square.github.io/okhttp/) for secure, periodic scenario synchronization.
 - **Background Operations**: [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) for reliable data syncing and notification scheduling.
 - **Reactive Streams**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) and [Flow](https://kotlinlang.org/docs/flow.html) for non-blocking UI and data operations.
-- **Preference Management**: [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) for type-safe user settings.
+- **Preference Management**: [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) for type-safe user settings and localized language preferences.
+- **Iconography**: Integrated [Material Icons Extended](https://developer.android.com/develop/ui/compose/components/icon) for a rich, descriptive visual experience.
 
 ---
 
