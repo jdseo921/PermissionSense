@@ -61,6 +61,23 @@ fun PermissionSenseAppShell() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    // Helper function for navigating to top-level destinations (tabs)
+    val navigateToTab = { route: NavRoute ->
+        navController.navigate(route) {
+            // Pop up to the start destination of the graph to
+            // avoid building up a large stack of destinations
+            // on the back stack as users select items
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            // Avoid multiple copies of the same destination when
+            // reselecting the same item
+            launchSingleTop = true
+            // Restore state when reselecting a previously selected item
+            restoreState = true
+        }
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -70,15 +87,7 @@ fun PermissionSenseAppShell() {
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) },
                         selected = isSelected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
+                        onClick = { navigateToTab(item.route) }
                     )
                 }
             }
@@ -115,9 +124,9 @@ fun PermissionSenseAppShell() {
         ) {
             composable<NavRoute.Landing> {
                 LandingScreen(
-                    onStartActivity = { navController.navigate(NavRoute.Activity) },
-                    onViewStatistics = { navController.navigate(NavRoute.Statistics) },
-                    onOpenSettings = { navController.navigate(NavRoute.Settings) }
+                    onStartActivity = { navigateToTab(NavRoute.Activity) },
+                    onViewStatistics = { navigateToTab(NavRoute.Statistics) },
+                    onOpenSettings = { navigateToTab(NavRoute.Settings) }
                 )
             }
             composable<NavRoute.Activity> {

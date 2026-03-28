@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -79,9 +81,53 @@ class ScenarioRepositoryImpl @Inject constructor(
                 completedScenarios = completedCount,
                 correctAnswers = correctCount,
                 averageScore = if (completedCount == 0) 0f else (correctCount.toFloat() / completedCount.toFloat()) * 100f,
+                currentStreak = calculateStreak(progressList.map { it.lastAttemptedAt }),
                 categoryBreakdown = categoryStats
             )
         }
+    }
+
+    private fun calculateStreak(timestamps: List<Long>): Int {
+        if (timestamps.isEmpty()) return 0
+        
+        val sortedDates = timestamps.map { 
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = it
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            cal.timeInMillis
+        }.distinct().sortedDescending()
+
+        val today = Calendar.getInstance()
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        val todayMs = today.timeInMillis
+
+        var streak = 0
+        var expectedDate = todayMs
+
+        // Check if user has done something today or yesterday to continue streak
+        if (sortedDates.first() < todayMs - TimeUnit.DAYS.toMillis(1)) {
+            return 0
+        }
+
+        if (sortedDates.first() == todayMs || sortedDates.first() == todayMs - TimeUnit.DAYS.toMillis(1)) {
+            expectedDate = sortedDates.first()
+            for (date in sortedDates) {
+                if (date == expectedDate) {
+                    streak++
+                    expectedDate -= TimeUnit.DAYS.toMillis(1)
+                } else {
+                    break
+                }
+            }
+        }
+
+        return streak
     }
 
     override suspend fun refreshScenarios() {

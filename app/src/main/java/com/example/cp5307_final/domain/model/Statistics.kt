@@ -5,6 +5,7 @@ data class Statistics(
     val completedScenarios: Int,
     val correctAnswers: Int,
     val averageScore: Float,
+    val currentStreak: Int,
     val categoryBreakdown: Map<String, CategoryStats>
 )
 

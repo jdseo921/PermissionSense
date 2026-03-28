@@ -4,13 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,6 +18,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
+    var showTimePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -66,9 +66,42 @@ fun SettingsScreen(
                 )
 
                 if (userSettings.dailyReminder) {
-                    TextButton(onClick = { /* Open Time Picker */ }) {
+                    TextButton(
+                        onClick = { showTimePicker = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text("Reminder Time: ${userSettings.reminderTime}")
                     }
+                }
+
+                if (showTimePicker) {
+                    val timeState = rememberTimePickerState(
+                        initialHour = userSettings.reminderTime.split(":")[0].toIntOrNull() ?: 9,
+                        initialMinute = userSettings.reminderTime.split(":")[1].toIntOrNull() ?: 0
+                    )
+
+                    AlertDialog(
+                        onDismissRequest = { showTimePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                val time = String.format(Locale.getDefault(), "%02d:%02d", timeState.hour, timeState.minute)
+                                viewModel.setReminderTime(time)
+                                showTimePicker = false
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showTimePicker = false }) {
+                                Text("Cancel")
+                            }
+                        },
+                        text = {
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                TimePicker(state = timeState)
+                            }
+                        }
+                    )
                 }
 
                 Spacer(Modifier.weight(1f))

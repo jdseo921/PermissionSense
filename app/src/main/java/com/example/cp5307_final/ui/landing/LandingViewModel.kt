@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,15 +28,20 @@ class LandingViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                // In a real app, we would fetch these from local/remote sources
-                repository.getScenarios().collect { scenarios ->
+                combine(
+                    repository.getScenarios(),
+                    repository.getStatistics()
+                ) { scenarios, stats ->
+                    scenarios to stats
+                }.collect { (scenarios, stats) ->
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
+                            // For now just picking the first one as a challenge
                             todaysChallenge = scenarios.firstOrNull(),
-                            totalCompleted = 12, // Mock data
-                            currentStreak = 5,   // Mock data
-                            accuracy = 85        // Mock data
+                            totalCompleted = stats.completedScenarios,
+                            currentStreak = calculateStreak(), // Still mock or implement
+                            accuracy = stats.averageScore.toInt()
                         )
                     }
                 }
@@ -43,5 +49,10 @@ class LandingViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
         }
+    }
+
+    private fun calculateStreak(): Int {
+        // Mock streak for now, ideally this would be calculated from progress timestamps
+        return 5
     }
 }
