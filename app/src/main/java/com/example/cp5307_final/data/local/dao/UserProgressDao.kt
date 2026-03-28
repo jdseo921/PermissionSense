@@ -20,4 +20,7 @@ interface UserProgressDao {
 
     @Query("SELECT * FROM user_progress WHERE scenarioId = :id")
     suspend fun getProgressForScenario(id: Int): UserProgressEntity?
+
+    @Query("DELETE FROM user_progress")
+    suspend fun deleteAllProgress()
 }

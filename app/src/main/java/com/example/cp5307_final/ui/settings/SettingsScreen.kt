@@ -1,8 +1,10 @@
 package com.example.cp5307_final.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -22,14 +24,17 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
     var showTimePicker by remember { mutableStateOf(false) }
+    
+    val lang = settings?.language ?: "English"
+    val t = { key: String -> LanguageManager.getTranslation(key, lang) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(t("settings")) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = t("exit"))
                     }
                 }
             )
@@ -39,13 +44,14 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             settings?.let { userSettings ->
                 SettingsToggleItem(
-                    title = "Dark Mode",
-                    description = "Enable dark theme for the app",
+                    title = t("dark_mode"),
+                    description = t("dark_mode_desc"),
                     checked = userSettings.isDarkMode,
                     onCheckedChange = { viewModel.setDarkMode(it) }
                 )
@@ -53,16 +59,48 @@ fun SettingsScreen(
                 HorizontalDivider()
 
                 SettingsToggleItem(
-                    title = "High Contrast",
-                    description = "Increase accessibility contrast",
+                    title = t("high_contrast"),
+                    description = t("high_contrast_desc"),
                     checked = userSettings.highContrast,
                     onCheckedChange = { viewModel.setHighContrast(it) }
                 )
 
                 HorizontalDivider()
 
+                // Language Setting
+                Text(text = t("language"), style = MaterialTheme.typography.titleMedium)
+                val langOptions = listOf("English", "Mandarin Chinese", "Korean")
+                Column(Modifier.selectableGroup()) {
+                    langOptions.forEach { text ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .selectable(
+                                    selected = (text == userSettings.language),
+                                    onClick = { viewModel.setLanguage(text) },
+                                    role = Role.RadioButton
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (text == userSettings.language),
+                                onClick = null
+                            )
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+
+                HorizontalDivider()
+
                 // Font Size Setting
-                Text(text = "Font Size", style = MaterialTheme.typography.titleMedium)
+                Text(text = t("font_size"), style = MaterialTheme.typography.titleMedium)
                 val radioOptions = listOf("Small", "Medium", "Large")
                 Column(Modifier.selectableGroup()) {
                     radioOptions.forEach { text ->
@@ -80,7 +118,7 @@ fun SettingsScreen(
                         ) {
                             RadioButton(
                                 selected = (text == userSettings.textSize),
-                                onClick = null // null recommended for accessibility with screen readers
+                                onClick = null
                             )
                             Text(
                                 text = text,
@@ -94,8 +132,8 @@ fun SettingsScreen(
                 HorizontalDivider()
 
                 SettingsToggleItem(
-                    title = "Daily Reminders",
-                    description = "Get notified to complete daily challenges",
+                    title = t("daily_reminders"),
+                    description = t("daily_reminders_desc"),
                     checked = userSettings.dailyReminder,
                     onCheckedChange = { viewModel.setDailyReminder(it) }
                 )
@@ -105,7 +143,7 @@ fun SettingsScreen(
                         onClick = { showTimePicker = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Reminder Time: ${userSettings.reminderTime}")
+                        Text("${t("reminder_time")}: ${userSettings.reminderTime}")
                     }
                 }
 
@@ -139,15 +177,17 @@ fun SettingsScreen(
                     )
                 }
 
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.height(32.dp))
 
                 Button(
                     onClick = { viewModel.resetProgress() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Reset All Progress")
+                    Text(t("reset_progress"))
                 }
+                
+                Spacer(Modifier.height(16.dp))
             }
         }
     }

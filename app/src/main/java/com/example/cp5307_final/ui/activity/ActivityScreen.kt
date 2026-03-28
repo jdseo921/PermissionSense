@@ -3,41 +3,47 @@ package com.example.cp5307_final.ui.activity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.cp5307_final.ui.settings.LanguageManager
+import com.example.cp5307_final.ui.settings.SettingsViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
     viewModel: ActivityViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val settings by settingsViewModel.settings.collectAsState()
     var showConfetti by remember { mutableStateOf(false) }
+    
+    val lang = settings?.language ?: "English"
+    val t = { key: String -> LanguageManager.getTranslation(key, lang) }
 
     LaunchedEffect(uiState.isCorrect, uiState.isAnswerSubmitted) {
         if (uiState.isCorrect && uiState.isAnswerSubmitted) {
@@ -47,144 +53,195 @@ fun ActivityScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Mission Challenge", style = MaterialTheme.typography.titleLarge) },
+                    title = { 
+                        Text(
+                            t("mission_challenge"), 
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp
+                            )
+                        ) 
+                    },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.Default.Close, contentDescription = "Exit")
+                            Icon(Icons.Default.Close, contentDescription = t("exit"))
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            }
+            },
+            containerColor = Color.Transparent
         ) { padding ->
             if (uiState.isLoading) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(strokeWidth = 6.dp)
                 }
             } else if (uiState.isFinished) {
-                CompletionView(onNavigateBack)
+                CompletionView(onNavigateBack, t)
             } else {
                 uiState.currentScenario?.let { scenario ->
                     Column(
                         modifier = Modifier
                             .padding(padding)
-                            .padding(20.dp)
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
-                        // Progress Indicator
-                        LinearProgressIndicator(
-                            progress = { uiState.progress },
-                            modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                        // Progress Section
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    t("mission_progress"),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "${(uiState.progress * 100).toInt()}%",
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                            LinearProgressIndicator(
+                                progress = { uiState.progress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(12.dp)
+                                    .clip(CircleShape),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        }
 
-                        // Scenario Text Card - More visually enriching
+                        // Scenario Card
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                            ),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                            shape = RoundedCornerShape(28.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Column(modifier = Modifier.padding(24.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                    Spacer(Modifier.width(8.dp))
+                                Surface(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
                                     Text(
-                                        text = scenario.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary
+                                        text = scenario.category.uppercase(),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
                                     )
                                 }
                                 Spacer(Modifier.height(16.dp))
                                 Text(
+                                    text = scenario.title,
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                Text(
                                     text = scenario.scenarioText,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2f
+                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
 
-                        // Answer Options
+                        // Options Section
                         Text(
-                            "WHAT SHOULD YOU DO?",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp)
+                            t("your_decision"),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.outline
                         )
-                        
-                        scenario.choices.forEachIndexed { index, choice ->
-                            AnswerOptionCard(
-                                text = choice,
-                                isSelected = uiState.selectedAnswerIndex == index,
-                                isCorrect = scenario.correctAnswerIndex == index,
-                                showResult = uiState.isAnswerSubmitted,
-                                onClick = { viewModel.selectAnswer(index) },
-                                enabled = !uiState.isAnswerSubmitted
-                            )
+
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            scenario.choices.forEachIndexed { index, choice ->
+                                AnswerOptionCard(
+                                    text = choice,
+                                    isSelected = uiState.selectedAnswerIndex == index,
+                                    isCorrect = scenario.correctAnswerIndex == index,
+                                    showResult = uiState.isAnswerSubmitted,
+                                    onClick = { viewModel.selectAnswer(index) },
+                                    enabled = !uiState.isAnswerSubmitted
+                                )
+                            }
                         }
 
-                        // Result Area
+                        // Result & Explanation
                         AnimatedVisibility(
                             visible = uiState.isAnswerSubmitted,
-                            enter = expandVertically() + fadeIn()
+                            enter = slideInVertically { it } + fadeIn(),
+                            exit = slideOutVertically { it } + fadeOut()
                         ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                ResultHeader(isCorrect = uiState.isCorrect)
-                                
+                            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                                val resultColor = if (uiState.isCorrect) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
+                                val resultIcon = if (uiState.isCorrect) Icons.Default.CheckCircle else Icons.Default.Warning
+
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = RoundedCornerShape(24.dp),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = if (uiState.isCorrect)
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                            else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
-                                    )
+                                        containerColor = resultColor.copy(alpha = 0.1f)
+                                    ),
+                                    border = BorderStroke(1.dp, resultColor.copy(alpha = 0.2f))
                                 ) {
-                                    Column(modifier = Modifier.padding(20.dp)) {
-                                        Text(
-                                            "WHY THIS MATTERS",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (uiState.isCorrect) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
-                                        )
-                                        Spacer(Modifier.height(8.dp))
+                                    Column(modifier = Modifier.padding(24.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(resultIcon, contentDescription = null, tint = resultColor)
+                                            Spacer(Modifier.width(12.dp))
+                                            Text(
+                                                text = if (uiState.isCorrect) t("secure_choice") else t("privacy_risk"),
+                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = resultColor
+                                            )
+                                        }
+                                        Spacer(Modifier.height(16.dp))
                                         Text(
                                             text = scenario.explanation,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
 
                                 Button(
                                     onClick = { viewModel.nextScenario() },
-                                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                                    shape = RoundedCornerShape(16.dp)
+                                    modifier = Modifier.fillMaxWidth().height(60.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
                                 ) {
-                                    Text("CONTINUE MISSION", style = MaterialTheme.typography.labelLarge)
+                                    Text(t("proceed_next"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                                    Spacer(Modifier.width(8.dp))
+                                    Icon(Icons.Default.ArrowForward, contentDescription = null)
                                 }
                             }
                         }
 
-                        // Submit Button (only show if not submitted)
                         if (!uiState.isAnswerSubmitted) {
                             Button(
                                 onClick = { viewModel.submitAnswer() },
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                modifier = Modifier.fillMaxWidth().height(60.dp),
                                 enabled = uiState.selectedAnswerIndex != null,
                                 shape = RoundedCornerShape(16.dp)
                             ) {
-                                Text("CONFIRM DECISION", style = MaterialTheme.typography.labelLarge)
+                                Text(t("confirm_decision"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                             }
                         }
+                        
+                        Spacer(Modifier.height(40.dp))
                     }
                 }
             }
@@ -195,58 +252,6 @@ fun ActivityScreen(
         }
     }
 }
-
-@Composable
-fun ConfettiEffect() {
-    val infiniteTransition = rememberInfiniteTransition(label = "confetti")
-    
-    val particles = remember {
-        List(30) {
-            ConfettiParticle(
-                x = Random.nextFloat(),
-                y = Random.nextFloat() * 0.5f,
-                color = listOf(Color.Yellow, Color.Cyan, Color.Magenta, Color.Green, Color.Red).random(),
-                size = Random.nextFloat() * 10f + 10f,
-                speed = Random.nextFloat() * 2000f + 1000f
-            )
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        particles.forEach { particle ->
-            val animY = infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(particle.speed.toInt(), easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                ),
-                label = "y"
-            )
-
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                tint = particle.color,
-                modifier = Modifier
-                    .offset(
-                        x = (particle.x * 400).dp,
-                        y = (animY.value * 800).dp
-                    )
-                    .size(particle.size.dp)
-                    .graphicsLayer(rotationZ = animY.value * 360)
-            )
-        }
-    }
-}
-
-data class ConfettiParticle(
-    val x: Float,
-    val y: Float,
-    val color: Color,
-    val size: Float,
-    val speed: Float
-)
 
 @Composable
 fun AnswerOptionCard(
@@ -261,85 +266,162 @@ fun AnswerOptionCard(
         showResult && isCorrect -> Color(0xFF4CAF50)
         showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error
         isSelected -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        else -> MaterialTheme.colorScheme.outlineVariant
     }
 
     val containerColor = when {
-        showResult && isCorrect -> Color(0xFF4CAF50).copy(alpha = 0.1f)
-        showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-        isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        showResult && isCorrect -> Color(0xFF4CAF50).copy(alpha = 0.08f)
+        showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
+        isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
         else -> MaterialTheme.colorScheme.surface
     }
 
-    OutlinedCard(
+    Surface(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(if (isSelected || showResult) 2.5.dp else 1.dp, borderColor),
-        colors = CardDefaults.outlinedCardColors(containerColor = containerColor)
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(if (isSelected || (showResult && isCorrect)) 2.dp else 1.dp, borderColor),
+        color = containerColor
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(if (isSelected) borderColor else Color.Transparent)
+                    .border(2.dp, borderColor, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected || (showResult && isCorrect)) {
+                    Icon(
+                        if (showResult && !isCorrect && isSelected) Icons.Default.Close else Icons.Default.Check,
+                        contentDescription = null,
+                        tint = if (isSelected) Color.White else borderColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.width(16.dp))
             Text(
                 text = text,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                ),
+                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (showResult) {
-                if (isCorrect) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50))
-                } else if (isSelected) {
-                    Icon(Icons.Default.Close, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                }
-            }
         }
     }
 }
 
 @Composable
-fun ResultHeader(isCorrect: Boolean) {
-    Text(
-        text = if (isCorrect) "EXCELLENT CHOICE!" else "STAY VIGILANT",
-        style = MaterialTheme.typography.titleMedium,
-        color = if (isCorrect) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
-        fontWeight = FontWeight.Black,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-fun CompletionView(onFinish: () -> Unit) {
+fun CompletionView(onFinish: () -> Unit, t: (String) -> String) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(100.dp),
-            tint = Color(0xFF4CAF50)
+        Box(contentAlignment = Alignment.Center) {
+            Surface(
+                modifier = Modifier.size(160.dp),
+                color = Color(0xFF4CAF50).copy(alpha = 0.1f),
+                shape = CircleShape
+            ) {}
+            Icon(
+                Icons.Default.Star,
+                contentDescription = null,
+                modifier = Modifier.size(100.dp),
+                tint = Color(0xFF4CAF50)
+            )
+        }
+        
+        Spacer(Modifier.height(32.dp))
+        Text(
+            t("mission_accomplished"), 
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+            textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(24.dp))
-        Text("MISSION COMPLETE", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
         Spacer(Modifier.height(16.dp))
         Text(
-            "You've enhanced your privacy awareness today. Keep practicing to become a privacy pro!",
+            t("completion_desc"),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        
         Spacer(Modifier.height(48.dp))
+        
         Button(
             onClick = onFinish,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(60.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("BACK TO COMMAND CENTER", style = MaterialTheme.typography.labelLarge)
+            Text(t("return_center"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
         }
     }
 }
+
+@Composable
+fun ConfettiEffect() {
+    val infiniteTransition = rememberInfiniteTransition(label = "confetti")
+    
+    val particles = remember {
+        List(40) {
+            ConfettiParticle(
+                x = Random.nextFloat(),
+                y = Random.nextFloat(),
+                color = listOf(Color(0xFF4CAF50), Color(0xFF2196F3), Color(0xFFFFC107), Color(0xFFE91E63), Color(0xFF9C27B0)).random(),
+                size = Random.nextFloat() * 12f + 8f,
+                speed = Random.nextFloat() * 2500f + 1500f
+            )
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        particles.forEach { particle ->
+            val animY = infiniteTransition.animateFloat(
+                initialValue = -0.1f,
+                targetValue = 1.1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(particle.speed.toInt(), easing = LinearOutSlowInEasing),
+                    repeatMode = RepeatMode.Restart
+                ),
+                label = "y"
+            )
+
+            val rotation = infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = 360f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = LinearEasing)
+                ),
+                label = "rotation"
+            )
+
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = (particle.x * 400).dp,
+                        y = (animY.value * 800).dp
+                    )
+                    .size(particle.size.dp)
+                    .graphicsLayer(rotationZ = rotation.value)
+                    .background(particle.color, shape = if (Random.nextBoolean()) CircleShape else RoundedCornerShape(2.dp))
+            )
+        }
+    }
+}
+
+data class ConfettiParticle(
+    val x: Float,
+    val y: Float,
+    val color: Color,
+    val size: Float,
+    val speed: Float
+)

@@ -45,9 +45,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { preferencesManager.updateHighContrast(enabled) }
     }
 
+    fun setLanguage(language: String) {
+        viewModelScope.launch { preferencesManager.updateLanguage(language) }
+    }
+
     fun resetProgress() {
         viewModelScope.launch {
-            // repository.resetUserProgress() 
+            repository.resetUserProgress()
         }
     }
 }

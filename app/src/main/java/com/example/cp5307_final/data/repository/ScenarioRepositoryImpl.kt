@@ -154,4 +154,8 @@ class ScenarioRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun resetUserProgress() {
+        userProgressDao.deleteAllProgress()
+    }
 }

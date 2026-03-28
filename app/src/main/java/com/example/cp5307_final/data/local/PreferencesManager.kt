@@ -23,6 +23,7 @@ class PreferencesManager @Inject constructor(
         val REMINDER_TIME = stringPreferencesKey("reminder_time")
         val TEXT_SIZE = stringPreferencesKey("text_size")
         val HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
+        val LANGUAGE = stringPreferencesKey("language")
     }
 
     val settings: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -31,7 +32,8 @@ class PreferencesManager @Inject constructor(
             dailyReminder = preferences[Keys.DAILY_REMINDER] ?: false,
             reminderTime = preferences[Keys.REMINDER_TIME] ?: "09:00",
             textSize = preferences[Keys.TEXT_SIZE] ?: "Medium",
-            highContrast = preferences[Keys.HIGH_CONTRAST] ?: false
+            highContrast = preferences[Keys.HIGH_CONTRAST] ?: false,
+            language = preferences[Keys.LANGUAGE] ?: "English"
         )
     }
 
@@ -54,6 +56,10 @@ class PreferencesManager @Inject constructor(
     suspend fun updateHighContrast(enabled: Boolean) {
         context.dataStore.edit { it[Keys.HIGH_CONTRAST] = enabled }
     }
+
+    suspend fun updateLanguage(language: String) {
+        context.dataStore.edit { it[Keys.LANGUAGE] = language }
+    }
 }
 
 data class UserSettings(
@@ -61,5 +67,6 @@ data class UserSettings(
     val dailyReminder: Boolean,
     val reminderTime: String,
     val textSize: String,
-    val highContrast: Boolean
+    val highContrast: Boolean,
+    val language: String
 )

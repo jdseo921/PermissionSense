@@ -14,4 +14,5 @@ interface ScenarioRepository {
     fun getStatistics(): Flow<Statistics>
     fun getMissedScenarios(): Flow<List<Scenario>>
     suspend fun refreshScenarios()
+    suspend fun resetUserProgress()
 }
