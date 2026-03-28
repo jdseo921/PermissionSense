@@ -30,26 +30,16 @@ class LandingViewModel @Inject constructor(
             try {
                 combine(
                     repository.getScenarios(),
-                    repository.getStatistics()
-                ) { scenarios, stats ->
-                    scenarios to stats
-                }.collect { (scenarios, stats) ->
-                    // Filter missed scenarios based on stats breakdown or by querying progress
-                    // For now, we'll assume we can derive it from scenarios if we had more info, 
-                    // but the repository provides statistics. Let's filter scenarios that were missed.
-                    // This is a simplification: missed = completed but not correct.
-                    // We need actual progress for this. Repository has getStatistics which has categoryBreakdown, 
-                    // but not individual missed IDs directly in stats. 
-                    // However, we can use a more direct approach if repository supported it.
-                    // Since I cannot change repository easily without checking all implementations,
-                    // I will filter based on the knowledge that missed questions are those where progress exists and isCorrect is false.
-                    
+                    repository.getStatistics(),
+                    repository.getMissedScenarios()
+                ) { scenarios, stats, missed ->
+                    Triple(scenarios, stats, missed)
+                }.collect { (scenarios, stats, missed) ->
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
                             todaysChallenge = scenarios.firstOrNull(),
-                            // In a real app, you'd fetch this from a 'getMissedScenarios' flow
-                            // For this mock/impl, let's just show some for UI purposes if none found
+                            missedScenarios = missed,
                             totalCompleted = stats.completedScenarios,
                             currentStreak = stats.currentStreak,
                             accuracy = stats.averageScore.toInt()

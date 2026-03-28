@@ -12,5 +12,6 @@ interface ScenarioRepository {
     fun getCompletedCount(): Flow<Int>
     fun getAccuracy(): Flow<Float>
     fun getStatistics(): Flow<Statistics>
+    fun getMissedScenarios(): Flow<List<Scenario>>
     suspend fun refreshScenarios()
 }

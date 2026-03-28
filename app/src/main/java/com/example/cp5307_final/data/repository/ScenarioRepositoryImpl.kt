@@ -87,6 +87,16 @@ class ScenarioRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getMissedScenarios(): Flow<List<Scenario>> {
+        return combine(
+            scenarioDao.getAllScenarios(),
+            userProgressDao.getAllProgress()
+        ) { scenarios, progressList ->
+            val missedIds = progressList.filter { !it.isCorrect && it.completed }.map { it.scenarioId }.toSet()
+            scenarios.filter { it.id in missedIds }.map { it.toDomain() }
+        }
+    }
+
     private fun calculateStreak(timestamps: List<Long>): Int {
         if (timestamps.isEmpty()) return 0
         
@@ -97,7 +107,8 @@ class ScenarioRepositoryImpl @Inject constructor(
             cal.set(Calendar.MINUTE, 0)
             cal.set(Calendar.SECOND, 0)
             cal.set(Calendar.MILLISECOND, 0)
-            cal.timeInMillis
+            val ms = cal.timeInMillis
+            ms
         }.distinct().sortedDescending()
 
         val today = Calendar.getInstance()
@@ -110,20 +121,19 @@ class ScenarioRepositoryImpl @Inject constructor(
         var streak = 0
         var expectedDate = todayMs
 
-        // Check if user has done something today or yesterday to continue streak
+        if (sortedDates.isEmpty()) return 0
+
         if (sortedDates.first() < todayMs - TimeUnit.DAYS.toMillis(1)) {
             return 0
         }
 
-        if (sortedDates.first() == todayMs || sortedDates.first() == todayMs - TimeUnit.DAYS.toMillis(1)) {
-            expectedDate = sortedDates.first()
-            for (date in sortedDates) {
-                if (date == expectedDate) {
-                    streak++
-                    expectedDate -= TimeUnit.DAYS.toMillis(1)
-                } else {
-                    break
-                }
+        expectedDate = sortedDates.first()
+        for (date in sortedDates) {
+            if (date == expectedDate) {
+                streak++
+                expectedDate -= TimeUnit.DAYS.toMillis(1)
+            } else {
+                break
             }
         }
 
