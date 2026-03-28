@@ -27,65 +27,90 @@ import com.example.cp5307_final.ui.activity.ActivityScreen
 import com.example.cp5307_final.ui.landing.LandingScreen
 import com.example.cp5307_final.ui.navigation.NavRoute
 import com.example.cp5307_final.ui.navigation.bottomNavItems
+import com.example.cp5307_final.ui.settings.LanguageManager
 import com.example.cp5307_final.ui.settings.SettingsScreen
 import com.example.cp5307_final.ui.settings.SettingsViewModel
 import com.example.cp5307_final.ui.statistics.StatisticsScreen
 import com.example.cp5307_final.ui.theme.PermissionSenseTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * This is the main starting point of the application.
+ * It's like the 'lobby' of a building where everything else is organized.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // We get the user's settings (like dark mode and language)
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val userSettings by settingsViewModel.settings.collectAsState()
             
+            // Determine if we should use Dark Mode based on settings or system preference
             val isDarkMode = userSettings?.isDarkMode ?: isSystemInDarkTheme()
+            val language = userSettings?.language ?: "English"
 
+            // Set the visual theme for the entire app
             PermissionSenseTheme(darkTheme = isDarkMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    PermissionSenseAppShell()
+                    // Launch the main 'shell' of the app which handles navigation
+                    PermissionSenseAppShell(language)
                 }
             }
         }
     }
 }
 
+/**
+ * This function sets up the main layout of the app, including the bottom navigation bar.
+ */
 @Composable
-fun PermissionSenseAppShell() {
+fun PermissionSenseAppShell(language: String) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    
+    // Translation helper to get words in the correct language
+    val t = { key: String -> LanguageManager.getTranslation(key, language) }
 
-    // Helper function for navigating to top-level destinations (tabs)
+    // This function handles switching between the different tabs (Home, Activity, etc.)
     val navigateToTab = { route: NavRoute ->
         navController.navigate(route) {
-            // Pop up to the start destination of the graph to
-            // avoid building up a large stack of destinations
-            // on the back stack as users select items
+            // Clears the history so we don't build up a huge stack of screens
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
-            // Avoid multiple copies of the same destination when
-            // reselecting the same item
+            // Avoids making a new copy of the screen if it's already on top
             launchSingleTop = true
-            // Restore state when reselecting a previously selected item
+            // Remembers what was happening on that screen before we left it
             restoreState = true
         }
     }
 
     Scaffold(
         bottomBar = {
+            // The bottom navigation menu
             NavigationBar {
                 bottomNavItems.forEach { item ->
+                    // Check if the current tab is the one being drawn
                     val isSelected = currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+                    
+                    // Translate the labels for the tabs
+                    val label = when (item.route) {
+                        NavRoute.Landing -> t("home")
+                        NavRoute.Activity -> t("mission") // Shortened to 'MISSION' to fit better
+                        NavRoute.Statistics -> t("stats")
+                        NavRoute.Settings -> t("settings")
+                        else -> item.label
+                    }
+                    
                     NavigationBarItem(
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) },
+                        icon = { Icon(item.icon, contentDescription = label) },
+                        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
                         selected = isSelected,
                         onClick = { navigateToTab(item.route) }
                     )
@@ -93,35 +118,20 @@ fun PermissionSenseAppShell() {
             }
         }
     ) { innerPadding ->
+        // This 'Host' manages which screen is actually shown inside the Scaffold
         NavHost(
             navController = navController,
             startDestination = NavRoute.Landing,
             modifier = Modifier.padding(innerPadding),
+            // Smooth animations for when we switch screens
             enterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(400)
-                ) + fadeIn(animationSpec = tween(400))
+                slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(400)) + fadeIn()
             },
             exitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(400)
-                ) + fadeOut(animationSpec = tween(400))
-            },
-            popEnterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(400)
-                ) + fadeIn(animationSpec = tween(400))
-            },
-            popExitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(400)
-                ) + fadeOut(animationSpec = tween(400))
+                slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(400)) + fadeOut()
             }
         ) {
+            // Define all the different 'Rooms' (Screens) in our app
             composable<NavRoute.Landing> {
                 LandingScreen(
                     onStartActivity = { navigateToTab(NavRoute.Activity) },

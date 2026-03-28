@@ -1,12 +1,21 @@
 package com.example.cp5307_final.ui.settings
 
+/**
+ * A simple manager to handle translations for different languages in the app.
+ * This makes it easy to switch between English, Chinese, and Korean.
+ */
 object LanguageManager {
+    /**
+     * Returns the translated string for a given key and language.
+     * If the language or key isn't found, it defaults to English.
+     */
     fun getTranslation(key: String, language: String): String {
         return translations[language]?.get(key) ?: translations["English"]?.get(key) ?: key
     }
 
     private val translations = mapOf(
         "English" to mapOf(
+            "mission" to "MISSION",
             "mission_challenge" to "MISSION CHALLENGE",
             "exit" to "Exit",
             "mission_progress" to "MISSION PROGRESS",
@@ -43,9 +52,16 @@ object LanguageManager {
             "review_missions" to "Review Missions",
             "explanation" to "EXPLANATION",
             "home" to "Home",
-            "stats" to "Stats"
+            "stats" to "Stats",
+            "lang_english" to "English",
+            "lang_chinese" to "Chinese",
+            "lang_korean" to "Korean",
+            "size_small" to "Small",
+            "size_medium" to "Medium",
+            "size_large" to "Large"
         ),
-        "Mandarin Chinese" to mapOf(
+        "Chinese" to mapOf(
+            "mission" to "任务",
             "mission_challenge" to "任务挑战",
             "exit" to "退出",
             "mission_progress" to "任务进度",
@@ -82,9 +98,16 @@ object LanguageManager {
             "review_missions" to "回顾任务",
             "explanation" to "解释",
             "home" to "主页",
-            "stats" to "统计"
+            "stats" to "统计",
+            "lang_english" to "英文",
+            "lang_chinese" to "中文",
+            "lang_korean" to "韩文",
+            "size_small" to "小",
+            "size_medium" to "中",
+            "size_large" to "大"
         ),
         "Korean" to mapOf(
+            "mission" to "미션",
             "mission_challenge" to "미션 챌린지",
             "exit" to "나가기",
             "mission_progress" to "미션 진행 상황",
@@ -121,7 +144,13 @@ object LanguageManager {
             "review_missions" to "미션 검토",
             "explanation" to "설명",
             "home" to "홈",
-            "stats" to "통계"
+            "stats" to "통계",
+            "lang_english" to "영어",
+            "lang_chinese" to "중국어",
+            "lang_korean" to "한국어",
+            "size_small" to "작게",
+            "size_medium" to "보통",
+            "size_large" to "크게"
         )
     )
 }

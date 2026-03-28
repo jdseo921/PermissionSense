@@ -31,6 +31,10 @@ import com.example.cp5307_final.ui.settings.SettingsViewModel
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
+/**
+ * The Activity Screen is where the user actually takes the privacy challenges.
+ * Think of it as the "Game Level" where you answer questions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
@@ -38,17 +42,20 @@ fun ActivityScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
+    // These 'collectAsState' lines let the screen react whenever data changes
     val uiState by viewModel.uiState.collectAsState()
     val settings by settingsViewModel.settings.collectAsState()
     var showConfetti by remember { mutableStateOf(false) }
     
+    // Setup translation based on user's chosen language
     val lang = settings?.language ?: "English"
     val t = { key: String -> LanguageManager.getTranslation(key, lang) }
 
+    // This block triggers the confetti effect when the user gets an answer right
     LaunchedEffect(uiState.isCorrect, uiState.isAnswerSubmitted) {
         if (uiState.isCorrect && uiState.isAnswerSubmitted) {
             showConfetti = true
-            delay(3000)
+            delay(3000) // Keep the confetti for 3 seconds
             showConfetti = false
         }
     }
@@ -56,6 +63,7 @@ fun ActivityScreen(
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Scaffold(
             topBar = {
+                // The title bar at the very top of the screen
                 CenterAlignedTopAppBar(
                     title = { 
                         Text(
@@ -67,6 +75,7 @@ fun ActivityScreen(
                         ) 
                     },
                     navigationIcon = {
+                        // The 'X' button to quit the mission
                         IconButton(onClick = onNavigateBack) {
                             Icon(Icons.Default.Close, contentDescription = t("exit"))
                         }
@@ -79,10 +88,12 @@ fun ActivityScreen(
             containerColor = Color.Transparent
         ) { padding ->
             if (uiState.isLoading) {
+                // Show a spinning circle if the data is still loading
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(strokeWidth = 6.dp)
                 }
             } else if (uiState.isFinished) {
+                // Show the 'Mission Accomplished' screen when done
                 CompletionView(onNavigateBack, t)
             } else {
                 uiState.currentScenario?.let { scenario ->
@@ -94,7 +105,7 @@ fun ActivityScreen(
                             .padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
-                        // Progress Section
+                        // Progress Bar showing how far along you are in the mission
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -122,7 +133,7 @@ fun ActivityScreen(
                             )
                         }
 
-                        // Scenario Card
+                        // The Scenario Card containing the question text
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(28.dp),
@@ -155,7 +166,7 @@ fun ActivityScreen(
                             }
                         }
 
-                        // Options Section
+                        // Label for the answer choices
                         Text(
                             t("your_decision"),
                             style = MaterialTheme.typography.labelLarge.copy(
@@ -165,6 +176,7 @@ fun ActivityScreen(
                             color = MaterialTheme.colorScheme.outline
                         )
 
+                        // List of possible answers
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             scenario.choices.forEachIndexed { index, choice ->
                                 AnswerOptionCard(
@@ -178,7 +190,7 @@ fun ActivityScreen(
                             }
                         }
 
-                        // Result & Explanation
+                        // Feedback area: Shows up after you submit an answer
                         AnimatedVisibility(
                             visible = uiState.isAnswerSubmitted,
                             enter = slideInVertically { it } + fadeIn(),
@@ -207,6 +219,7 @@ fun ActivityScreen(
                                             )
                                         }
                                         Spacer(Modifier.height(16.dp))
+                                        // Explains WHY the answer was right or wrong
                                         Text(
                                             text = scenario.explanation,
                                             style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
@@ -215,6 +228,7 @@ fun ActivityScreen(
                                     }
                                 }
 
+                                // Button to go to the next question
                                 Button(
                                     onClick = { viewModel.nextScenario() },
                                     modifier = Modifier.fillMaxWidth().height(60.dp),
@@ -230,6 +244,7 @@ fun ActivityScreen(
                             }
                         }
 
+                        // Confirm button: Only shown before you submit your choice
                         if (!uiState.isAnswerSubmitted) {
                             Button(
                                 onClick = { viewModel.submitAnswer() },
@@ -247,12 +262,17 @@ fun ActivityScreen(
             }
         }
 
+        // The celebratory effect for correct answers
         if (showConfetti) {
             ConfettiEffect()
         }
     }
 }
 
+/**
+ * A custom card for each multiple-choice answer.
+ * It changes color based on whether it's selected and if the result is shown.
+ */
 @Composable
 fun AnswerOptionCard(
     text: String,
@@ -263,10 +283,10 @@ fun AnswerOptionCard(
     enabled: Boolean
 ) {
     val borderColor = when {
-        showResult && isCorrect -> Color(0xFF4CAF50)
-        showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error
-        isSelected -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.outlineVariant
+        showResult && isCorrect -> Color(0xFF4CAF50) // Green for correct
+        showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error // Red for wrong selection
+        isSelected -> MaterialTheme.colorScheme.primary // Blue for current selection
+        else -> MaterialTheme.colorScheme.outlineVariant // Gray for others
     }
 
     val containerColor = when {
@@ -288,6 +308,7 @@ fun AnswerOptionCard(
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // A small circular radio button or check/cross icon
             Box(
                 modifier = Modifier
                     .size(24.dp)
@@ -318,6 +339,9 @@ fun AnswerOptionCard(
     }
 }
 
+/**
+ * The screen shown after all questions in a mission are answered.
+ */
 @Composable
 fun CompletionView(onFinish: () -> Unit, t: (String) -> String) {
     Column(
@@ -367,10 +391,14 @@ fun CompletionView(onFinish: () -> Unit, t: (String) -> String) {
     }
 }
 
+/**
+ * Creates a fun animation of falling colorful particles.
+ */
 @Composable
 fun ConfettiEffect() {
     val infiniteTransition = rememberInfiniteTransition(label = "confetti")
     
+    // Create a list of particles with random positions and colors
     val particles = remember {
         List(40) {
             ConfettiParticle(
@@ -385,6 +413,7 @@ fun ConfettiEffect() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         particles.forEach { particle ->
+            // Animate each particle from top to bottom
             val animY = infiniteTransition.animateFloat(
                 initialValue = -0.1f,
                 targetValue = 1.1f,

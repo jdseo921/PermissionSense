@@ -23,6 +23,10 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.util.*
 
+/**
+ * The Settings Screen allows the user to customize the app.
+ * You can change the language, turn on Dark Mode, or reset your progress here.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -33,9 +37,11 @@ fun SettingsScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     val context = LocalContext.current
     
+    // Get language and translation helper
     val lang = settings?.language ?: "English"
     val t = { key: String -> LanguageManager.getTranslation(key, lang) }
 
+    // This helps ask the Android system for permission to show notifications
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -65,6 +71,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             settings?.let { userSettings ->
+                // Dark Mode Switch
                 SettingsToggleItem(
                     title = t("dark_mode"),
                     description = t("dark_mode_desc"),
@@ -74,6 +81,7 @@ fun SettingsScreen(
                 
                 HorizontalDivider()
 
+                // Accessibility: High Contrast Switch
                 SettingsToggleItem(
                     title = t("high_contrast"),
                     description = t("high_contrast_desc"),
@@ -83,29 +91,33 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
-                // Language Setting
+                // Language Selection: Radio buttons for English, Chinese, or Korean
                 Text(text = t("language"), style = MaterialTheme.typography.titleMedium)
-                val langOptions = listOf("English", "Mandarin Chinese", "Korean")
+                val langOptions = listOf(
+                    "English" to "lang_english",
+                    "Chinese" to "lang_chinese",
+                    "Korean" to "lang_korean"
+                )
                 Column(Modifier.selectableGroup()) {
-                    langOptions.forEach { text ->
+                    langOptions.forEach { (langName, langKey) ->
                         Row(
                             Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
                                 .selectable(
-                                    selected = (text == userSettings.language),
-                                    onClick = { viewModel.setLanguage(text) },
+                                    selected = (langName == userSettings.language),
+                                    onClick = { viewModel.setLanguage(langName) },
                                     role = Role.RadioButton
                                 )
                                 .padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = (text == userSettings.language),
+                                selected = (langName == userSettings.language),
                                 onClick = null
                             )
                             Text(
-                                text = text,
+                                text = t(langKey),
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
@@ -115,29 +127,33 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
-                // Font Size Setting
+                // Font Size Selection
                 Text(text = t("font_size"), style = MaterialTheme.typography.titleMedium)
-                val radioOptions = listOf("Small", "Medium", "Large")
+                val radioOptions = listOf(
+                    "Small" to "size_small",
+                    "Medium" to "size_medium",
+                    "Large" to "size_large"
+                )
                 Column(Modifier.selectableGroup()) {
-                    radioOptions.forEach { text ->
+                    radioOptions.forEach { (sizeName, sizeKey) ->
                         Row(
                             Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
                                 .selectable(
-                                    selected = (text == userSettings.textSize),
-                                    onClick = { viewModel.setTextSize(text) },
+                                    selected = (sizeName == userSettings.textSize),
+                                    onClick = { viewModel.setTextSize(sizeName) },
                                     role = Role.RadioButton
                                 )
                                 .padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = (text == userSettings.textSize),
+                                selected = (sizeName == userSettings.textSize),
                                 onClick = null
                             )
                             Text(
-                                text = text,
+                                text = t(sizeKey),
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
@@ -147,6 +163,7 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
+                // Daily Reminders: Asks for notification permission on modern Android versions
                 SettingsToggleItem(
                     title = t("daily_reminders"),
                     description = t("daily_reminders_desc"),
@@ -164,6 +181,7 @@ fun SettingsScreen(
                     }
                 )
 
+                // If reminders are on, show a button to pick the time
                 if (userSettings.dailyReminder) {
                     TextButton(
                         onClick = { showTimePicker = true },
@@ -173,6 +191,7 @@ fun SettingsScreen(
                     }
                 }
 
+                // A pop-up clock to choose the reminder time
                 if (showTimePicker) {
                     val timeState = rememberTimePickerState(
                         initialHour = userSettings.reminderTime.split(":")[0].toIntOrNull() ?: 9,
@@ -205,6 +224,7 @@ fun SettingsScreen(
 
                 Spacer(Modifier.height(32.dp))
 
+                // Reset Button: Deletes all the user's mission progress
                 Button(
                     onClick = { viewModel.resetProgress() },
                     modifier = Modifier.fillMaxWidth(),
@@ -219,6 +239,9 @@ fun SettingsScreen(
     }
 }
 
+/**
+ * A simple row with a title, description, and an On/Off switch.
+ */
 @Composable
 fun SettingsToggleItem(
     title: String,

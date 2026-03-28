@@ -24,6 +24,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cp5307_final.ui.settings.LanguageManager
 import com.example.cp5307_final.ui.settings.SettingsViewModel
 
+/**
+ * The 'Landing' or Home screen of the app. 
+ * This is the first thing users see when they open the app.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(
@@ -33,14 +37,17 @@ fun LandingScreen(
     onViewStatistics: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
+    // Collect the current data from our 'View Models' (the brains of the screen)
     val uiState by viewModel.uiState.collectAsState()
     val settings by settingsViewModel.settings.collectAsState()
     
+    // Helper to get the right language
     val lang = settings?.language ?: "English"
     val t = { key: String -> LanguageManager.getTranslation(key, lang) }
 
     Scaffold(
         topBar = {
+            // This is the big blue area at the top of the home screen
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -67,6 +74,7 @@ fun LandingScreen(
                         verticalAlignment = Alignment.Bottom
                     ) {
                         Column {
+                            // The App Name
                             Text(
                                 text = "PermissionSense",
                                 style = MaterialTheme.typography.headlineLarge.copy(
@@ -75,6 +83,7 @@ fun LandingScreen(
                                 ),
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
+                            // A welcoming subtitle
                             Text(
                                 text = t("privacy_journey"),
                                 style = MaterialTheme.typography.titleMedium,
@@ -82,7 +91,7 @@ fun LandingScreen(
                             )
                         }
                         
-                        // Streak Badge in Header
+                        // The 'Fire' badge showing how many days in a row you've used the app
                         Surface(
                             color = Color.White.copy(alpha = 0.2f),
                             shape = RoundedCornerShape(16.dp),
@@ -111,6 +120,7 @@ fun LandingScreen(
             }
         }
     ) { padding ->
+        // The main content area where we list missions
         Column(
             modifier = Modifier
                 .padding(top = padding.calculateTopPadding())
@@ -120,7 +130,7 @@ fun LandingScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Today's Challenge Section
+            // Section for Today's mission
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -130,6 +140,7 @@ fun LandingScreen(
                     modifier = Modifier.align(Alignment.Start)
                 )
 
+                // The Card showing the mission details
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
@@ -138,6 +149,7 @@ fun LandingScreen(
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         uiState.todaysChallenge?.let { scenario ->
+                            // Shows which category the mission is in (like 'Privacy' or 'Security')
                             Surface(
                                 color = MaterialTheme.colorScheme.primaryContainer,
                                 shape = RoundedCornerShape(8.dp)
@@ -151,6 +163,7 @@ fun LandingScreen(
                                 )
                             }
                             Spacer(Modifier.height(16.dp))
+                            // The title and text of the mission
                             Text(
                                 text = scenario.title,
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -167,6 +180,7 @@ fun LandingScreen(
 
                         Spacer(Modifier.height(24.dp))
                         
+                        // The button to start the mission
                         Button(
                             onClick = onStartActivity,
                             modifier = Modifier.fillMaxWidth(),
@@ -181,7 +195,7 @@ fun LandingScreen(
                 }
             }
 
-            // Missed Questions Section
+            // Section for reviewing missions you got wrong before
             if (uiState.missedScenarios.isNotEmpty()) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -192,6 +206,7 @@ fun LandingScreen(
                         modifier = Modifier.align(Alignment.Start)
                     )
 
+                    // Draw a card for each missed mission
                     uiState.missedScenarios.forEach { scenario ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -217,6 +232,7 @@ fun LandingScreen(
                                     )
                                 }
                                 Spacer(Modifier.height(12.dp))
+                                // Explanation of why the previous choice was a risk
                                 Text(
                                     text = t("explanation") + ":",
                                     style = MaterialTheme.typography.labelSmall,

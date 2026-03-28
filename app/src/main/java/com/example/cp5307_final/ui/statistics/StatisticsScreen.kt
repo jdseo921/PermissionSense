@@ -25,6 +25,10 @@ import com.example.cp5307_final.domain.model.Statistics
 import com.example.cp5307_final.ui.settings.LanguageManager
 import com.example.cp5307_final.ui.settings.SettingsViewModel
 
+/**
+ * The Statistics Screen shows the user how they've been doing over time.
+ * It's like a 'Report Card' for your privacy skills.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
@@ -35,11 +39,13 @@ fun StatisticsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val settings by settingsViewModel.settings.collectAsState()
     
+    // Get the current language setting
     val lang = settings?.language ?: "English"
     val t = { key: String -> LanguageManager.getTranslation(key, lang) }
 
     Scaffold(
         topBar = {
+            // A large header bar at the top
             LargeTopAppBar(
                 title = { 
                     Column {
@@ -58,6 +64,7 @@ fun StatisticsScreen(
                     }
                 },
                 navigationIcon = {
+                    // Back button to go back to the previous screen
                     IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = t("exit"))
                     }
@@ -83,10 +90,10 @@ fun StatisticsScreen(
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 uiState.statistics?.let { stats ->
-                    // Performance Overview
+                    // Performance Overview: Shows general numbers like accuracy
                     PerformanceGrid(stats, t)
                     
-                    // Category Section
+                    // Category Section: Breaks down how you did in Privacy, Security, etc.
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -110,12 +117,13 @@ fun StatisticsScreen(
                             )
                         }
 
+                        // Create a progress card for each category
                         stats.categoryBreakdown.forEach { (category, categoryStats) ->
                             CategoryStatCard(category, categoryStats.completed, categoryStats.total, categoryStats.correct, t)
                         }
                     }
 
-                    // Motivational Tip
+                    // Motivational Tip: A friendly message to keep the user going
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
@@ -164,6 +172,9 @@ fun StatisticsScreen(
     }
 }
 
+/**
+ * A grid showing summary boxes for 'Completed missions', 'Accuracy', and 'Total Correct'.
+ */
 @Composable
 fun PerformanceGrid(stats: Statistics, t: (String) -> String) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -198,6 +209,9 @@ fun PerformanceGrid(stats: Statistics, t: (String) -> String) {
     }
 }
 
+/**
+ * A small reusable card to show a single piece of information (like Accuracy).
+ */
 @Composable
 fun InfoCard(
     label: String,
@@ -234,6 +248,9 @@ fun InfoCard(
     }
 }
 
+/**
+ * A card showing the progress bar and accuracy for a specific category (e.g. 'Security').
+ */
 @Composable
 fun CategoryStatCard(category: String, completed: Int, total: Int, correct: Int, t: (String) -> String) {
     val progress = if (total > 0) completed.toFloat() / total else 0f
@@ -269,6 +286,7 @@ fun CategoryStatCard(category: String, completed: Int, total: Int, correct: Int,
             
             Spacer(Modifier.height(16.dp))
             
+            // Visual progress bar
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier

@@ -41,15 +41,48 @@ PermissionSense is built using a modern, reactive stack following the **MVVM (Mo
 ### Prerequisites
 - **Android Studio Ladybug** (or later)
 - **Android SDK 35**
-- **Java 17**
+- **Java 17 (JDK 17)** configured in Android Studio
 
-### Installation
+### Building the Project
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/your-repo/permissionsense.git
    ```
-2. **Open in Android Studio** and allow the initial Gradle sync to complete.
-3. **Build & Deploy**: The app includes a proactive seeding mechanism that populates the local database with essential scenarios on the first launch, ensuring a seamless "Zero-Configuration" experience.
+2. **Open in Android Studio**:
+   - Launch Android Studio and select `Open`.
+   - Navigate to the `PermissionSense` root folder and click `OK`.
+3. **Gradle Sync**:
+   - Android Studio should automatically start a Gradle sync. If not, click the `Sync Project with Gradle Files` icon in the toolbar.
+   - Wait for the sync to complete. Ensure you have an active internet connection to download dependencies.
+4. **Build via IDE**:
+   - Go to `Build > Make Project` or press `Ctrl+F9`.
+5. **Build via CLI**:
+   - Open a terminal in the project root and run:
+     ```bash
+     ./gradlew assembleDebug
+     ```
+
+### Running the App
+1. **Select Device**: Choose an Android Virtual Device (Emulator) or a physical device connected via USB (Ensure API 24 or higher).
+2. **Launch**: Click the green `Run` icon (Play button) or press `Shift+F10`.
+3. **First Launch**: The app will automatically seed the local database with initial privacy scenarios. This may take a few seconds on the first run.
+
+---
+
+## 🛠 Troubleshooting Gradle Failures
+If you encounter errors during the build process, try the following steps:
+
+1. **Verify JDK Version**:
+   - Go to `File > Settings > Build, Execution, Deployment > Build Tools > Gradle`.
+   - Ensure the `Gradle JDK` is set to **Java 17**.
+2. **Clean and Rebuild**:
+   - Select `Build > Clean Project`, then `Build > Rebuild Project`.
+3. **Invalidate Caches**:
+   - Go to `File > Invalidate Caches / Restart...` and select `Invalidate and Restart`.
+4. **Check Extended Icons Pack**:
+   - This project relies on `androidx.compose.material:material-icons-extended`. If icons like `Stars` or `Whatshot` fail to resolve, ensure this dependency is correctly listed in `app/build.gradle.kts`.
+5. **Memory Issues**:
+   - If the build hangs, check `gradle.properties` and ensure `org.gradle.jvmargs` provides enough memory (e.g., `-Xmx4096m`).
 
 ---
 
@@ -59,4 +92,4 @@ The project maintains high reliability through a comprehensive test suite:
 - **ViewModel Testing**: Verification of state transitions and UI-driven business logic.
 - **Integration Testing**: Ensuring smooth interactions between Room and Repository layers.
 
-*Run all tests via: `gradlew test`*
+*Run all tests via: `./gradlew test`*
